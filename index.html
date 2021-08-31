@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecta Bit - CRUD - Vue.JS + PHP + PGSQL </title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+</head>
+
+<body>
+    <div class="container" id="app">
+        <h4 class="text-center mt-5 fw-bold text-primary">VUE.JS + BOOTSTRAP 5 + AXIOS + ALERTIFY + PHP + POSTGRESQL
+        </h4>
+        <P class="text-success text-center fw-bold">LISTADO DE ALUMNOS</P>
+        <button type="button" class="btn btn-success btn-sm mt-2 mb-4" data-bs-toggle="modal" data-bs-target="#modalNew"><i class="fa fa-address-book-o"></i>Nuevo</button>
+        <hr>
+
+
+
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered border-primary" width="100%">
+                        <thead class="table-primary text-center">
+                            <tr>
+                                <th>D.N.I</th>
+                                <th>NOMBRES</th>
+                                <th>AP. PATERNO</th>
+                                <th>AP. MATERNO</th>
+                                <th>CELULAR</th>
+                                <th>CORREO</th>
+                                <th>FOTO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="alumno in alumnos" class="text-center">
+                                <th>{{alumno.dni}}</th>
+                                <th>{{alumno.nombres}}</th>
+                                <th>{{alumno.paterno}}</th>
+                                <th>{{alumno.materno}}</th>
+                                <th>{{alumno.celular}}</th>
+                                <th>{{alumno.correo}}</th>
+                                <th><img :src="'/api/img/'+alumno.foto" alt="imagen del alumno" width="30"></th>
+                                <td>
+                                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalEdit" @click="elegirAlumno(alumno)"><i class="fa fa-edit"></i> Editar</button>
+                                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete" @click="elegirAlumno(alumno)"><i class="fa fa-trash"></i>Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ modal agregar @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+        <div class="modal fade" id="modalNew" tabindex="-1" role="dialog" data-bs-keyboard="false" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"><i class="fa fa-user-circle"></i>Crear Alumno</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body">
+                        <form name="formNew">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="" id="dni" placeholder="">
+                                        <label for="dni">D.N.I</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="" id="nombres" placeholder="">
+                                        <label for="nombres">NOMBRES</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="" id="appaterno" placeholder="">
+                                        <label for="appaterno">Ap. Paterno</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="" id="apmaterno" placeholder="">
+                                        <label for="apmaterno">Ap. Materno</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="" id="celular" placeholder="">
+                                        <label for="celular">Celular</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="" id="correo" placeholder="">
+                                        <label for="correo">Correo</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label for="foto" class="col-sm-2 col-form-label">Foto</label>
+                                <div class="col-sm-10">
+                                    <input type="file" name="foto" ref="foto" id="foto" v-on:change="verImagen()">
+                                </div>
+                            </div>
+                            <div><img v-if="url" :src="url" width="200"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" id="closeNew" @click="nlimpiarAlumno()"><i
+                            class="fa fa-remove"></i>Cerrar</button>
+                        <button type="button" class="btn btn-outline-primary" @click="insertarAlumno()"><i class="fa fa-save"></i>Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ modal Editar @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+        <div class="modal fade" id="modalEdit" tabindex="-1" role="dialog" data-bs-keyboard="false" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"><i class="fas fa-user-edit"></i>Editar Alumno</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                    </div>
+                    <div class="modal-body">
+                        <form name="formEdit">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="edni" id="edni" placeholder="" v-model="usuario.dni">
+                                        <label for="edni">D.N.I</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="enombres" id="enombres" placeholder="" v-model="usuario.nombres">
+                                        <label for="enombres">NOMBRES</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="eappaterno" id="eappaterno" placeholder="" v-model="usuario.paterno">
+                                        <label for="eappaterno">Ap. Paterno</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="eapmaterno" id="eapmaterno" placeholder="" v-model="usuario.materno">
+                                        <label for="eapmaterno">Ap. Materno</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="ecelular" id="ecelular" placeholder="" v-model="usuario.celular">
+                                        <label for="ecelular">Celular</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <input class="form-control" type="text" name="ecorreo" id="ecorreo" placeholder="" v-model="usuario.correo">
+                                        <label for="ecorreo">Correo</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label for="efoto" class="col-sm-2 col-form-label">Foto</label>
+                                <div class="col-sm-10">
+                                    <input type="file" name="efoto" ref="efoto" id="efoto" v-on:change="everImagen()">
+                                </div>
+                            </div>
+                            <div v-if="eurl">
+                                <img :src="eurl" width="200">
+                            </div>
+                            <div v-else="eurl">
+                                <img :src="'/api/img/'+usuario.foto" width="200">
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" id="edni" name="edni" v-model="usuario.dni">
+                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" id="closeEdit"><i
+                        class="fa fa-remove"></i>Cerrar</button>
+                        <button type="button" class="btn btn-outline-primary" @click="editarAlumno()"><i class="fa fa-edit"></i> Editar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ modal Eliminar @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+        <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" data-bs-keyboard="false" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"><i class="fa fa-trash"></i>Editar Alumno</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                    </div>
+                    <div class="modal-body">
+                        <h2>Desea Eliminar El usuario</h2>
+                        <h3>{{usuario.nombres +' '+ usuario.paterno +' '+ usuario.materno}}</h3>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" id="ddni" name="ddni" v-model="usuario.dni">
+                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" id="closeEliminar"><i
+                        class="fa fa-trash-alt"></i>Cerrar</button>
+                        <button type="button" class="btn btn-outline-primary" @click="eliminarAlumno()"><i class="fa fa-remove"></i> Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+    <!-- Vue.Js -->
+    <!-- Axios -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js" integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg==" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <script src="https://use.fontawesome.com/0220572bb6.js"></script>
+    <!-- Alertify -->
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
